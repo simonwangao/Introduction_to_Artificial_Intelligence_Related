@@ -1,2 +1,2 @@
-# Artificial_Intelligence_Releated
-Containing labs and projects from Artificial Intelligence (DATA130008.01) @ Fudan University
+# Artificial Intelligence Releated
+Containing labs and projects from __Artificial Intelligence__ (DATA130008.01) @ Fudan University
