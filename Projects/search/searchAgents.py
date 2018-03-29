@@ -288,21 +288,25 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        # IMPORTANT:
+        # Can not simply use coordinates as state, in that it will not be explored twice
 
-    def getStartState(self):
+    def getStartState(self):    #
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        return (self.startingPosition, self.corners)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        return len(state[1]) == 0
 
     def getSuccessors(self, state):
         """
@@ -317,14 +321,17 @@ class CornersProblem(search.SearchProblem):
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x,y = state[0] #current state
+            dx, dy = Actions.directionToVector(action)  #next movement
+            nextx, nexty = int(x + dx), int(y + dy) #next state
+            currentState = (nextx, nexty)
+            visited_cornors = list(state[1])
+            if currentState in visited_cornors:
+                visited_cornors.remove(currentState)
+            if not self.walls[nextx][nexty]:
+                successors.append( ((currentState, tuple(visited_cornors)), action, 1) )
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -360,7 +367,22 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    #return 0 # Default to trivial solution
+    # recursively find the corner that has the shortest path to current node
+    current_node, left_corners = state
+    left_corners = list(left_corners)
+    value = 0
+    while(len(left_corners) != 0):
+        distance_corner_pair = []
+        for corner in left_corners:
+            distance = util.manhattanDistance(current_node, corner)
+            distance_corner_pair.append((distance, corner))
+        pair = min(distance_corner_pair)
+        value += pair[0]
+        current_node = pair[1]
+        left_corners.remove(pair[1])
+    return value
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -423,7 +445,7 @@ class AStarFoodSearchAgent(SearchAgent):
     def __init__(self):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
-
+            
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -454,7 +476,103 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    # query 'problem'
+    # store things in problem.heuristicInfo as a dict
+    # the coordinates are just like x-y coordinates
+
+    # Dynamic Programming?
+
+    food_list = foodGrid.asList()   #the coordinates of food
+    if problem.heuristicInfo.get('wall_list_key') is not None:
+        wall_list = problem.heuristicInfo['wall_list_key']
+    else:
+        wall_list = problem.walls.asList()  #the coordinates of walls
+        problem.heuristicInfo['wall_list_key'] = wall_list
+    
+    val = 0
+    val_lis = []
+    current_state = position    #remeber to update
+    while(len(food_list) != 0):
+        start_state = current_state
+        if problem.heuristicInfo.get( (start_state, 'shortest') ) is not None:
+            tmp = problem.heuristicInfo[ (start_state, 'shortest') ]
+            if tmp[0] in food_list:
+                current_state = tmp[0][:]
+                val_lis.append(tmp[1])
+                #val += tmp[1]
+                food_list.remove(tmp[0])
+                continue
+        frontier = util.Queue()
+        frontier.push( (current_state, []) )   
+        explored = []
+        
+        while(not frontier.isEmpty()):
+            current_node = frontier.pop()
+            current_state, path = current_node  #update current_state
+            if current_state not in explored:
+                explored.append(current_state)
+                if current_state in food_list:
+                    food_list.remove(current_state)
+                    val_lis.append(len(path))
+                    #val += len(path)
+                    problem.heuristicInfo[ (start_state, 'shortest') ] = (current_state, len(path)) #push 1
+                    break
+                
+                #succ_lis = problem.getSuccessors(current_state)
+                if problem.heuristicInfo.get(current_state) is not None:
+                    succ_lis = problem.heuristicInfo[current_state]
+                else:
+                    succ_lis = problem.getSuccessors( (current_state, foodGrid) ) #
+                    problem.heuristicInfo[current_state] = succ_lis #push 2
+                
+                for pair in succ_lis: 
+                    if pair[0] not in explored:
+                        frontier.push( (pair[0][0], path + [pair[1]]) ) #
+    '''if len(val_lis) == 0:
+        return 0
+    else:
+        return min(val_lis)'''
+    #return val
+    
+    '''
+    #position, foodGrid = state, food_list, wall_list
+    # state is always a tuple od coordiantes
+    if len(food_list) == 0:
+        return 0
+
+    distance_lis = [] # remember to append
+    for food in food_list:
+        if problem.heuristicInfo.get( (position, food) ) is not None:
+            distance_lis.append(problem.heuristicInfo[(position, food)])
+            continue
+        frontier = util.Queue()
+        current_state = position
+        frontier.push( (current_state, []) )   #a node is composed of a state and a path to start node
+        explored = []
+        
+        while(not frontier.isEmpty()):
+            current_node = frontier.pop()
+            current_state, path = current_node
+            if current_state not in explored:
+                explored.append(current_state)
+                if current_state == food:
+                    problem.heuristicInfo[ (position, food) ] = len(path)   #push 1
+                    problem.heuristicInfo[ (food, position) ] = len(path)
+                    distance_lis.append(len(path))
+                    break
+                
+                if problem.heuristicInfo.get(current_state) is not None:
+                    succ_lis = problem.heuristicInfo[current_state][:]
+                else:
+                    succ_lis = problem.getSuccessors( (current_state, foodGrid) ) #
+                    problem.heuristicInfo[current_state] = succ_lis[:]  #push 2
+                
+                for pair in succ_lis: 
+                    if pair[0] not in explored:
+                        frontier.push( (pair[0][0], path + [pair[1]]) ) # note!
+    return max(distance_lis)
+    '''
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
