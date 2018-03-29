@@ -482,15 +482,22 @@ def foodHeuristic(state, problem):
 
     # Dynamic Programming?
 
+    # the evaluated value has to be a lower bound of real cost,
+    # but the closer the better,
+    # in that the closer, the more precise of the evaluation,
+    # then the mistaking actions will be less
+
+    # the algorithm below can solve mediumSearch in 0.3s, but it is WRONG!!!
+    # in that go to the nearest food everytime is NOT optimal
+    
     food_list = foodGrid.asList()   #the coordinates of food
     if problem.heuristicInfo.get('wall_list_key') is not None:
         wall_list = problem.heuristicInfo['wall_list_key']
     else:
         wall_list = problem.walls.asList()  #the coordinates of walls
         problem.heuristicInfo['wall_list_key'] = wall_list
-    
+    '''
     val = 0
-    val_lis = []
     current_state = position    #remeber to update
     while(len(food_list) != 0):
         start_state = current_state
@@ -498,8 +505,7 @@ def foodHeuristic(state, problem):
             tmp = problem.heuristicInfo[ (start_state, 'shortest') ]
             if tmp[0] in food_list:
                 current_state = tmp[0][:]
-                val_lis.append(tmp[1])
-                #val += tmp[1]
+                val += tmp[1]
                 food_list.remove(tmp[0])
                 continue
         frontier = util.Queue()
@@ -513,8 +519,7 @@ def foodHeuristic(state, problem):
                 explored.append(current_state)
                 if current_state in food_list:
                     food_list.remove(current_state)
-                    val_lis.append(len(path))
-                    #val += len(path)
+                    val += len(path)
                     problem.heuristicInfo[ (start_state, 'shortest') ] = (current_state, len(path)) #push 1
                     break
                 
@@ -528,13 +533,9 @@ def foodHeuristic(state, problem):
                 for pair in succ_lis: 
                     if pair[0] not in explored:
                         frontier.push( (pair[0][0], path + [pair[1]]) ) #
-    '''if len(val_lis) == 0:
-        return 0
-    else:
-        return min(val_lis)'''
-    #return val
-    
+    return val
     '''
+    
     #position, foodGrid = state, food_list, wall_list
     # state is always a tuple od coordiantes
     if len(food_list) == 0:
@@ -562,16 +563,16 @@ def foodHeuristic(state, problem):
                     break
                 
                 if problem.heuristicInfo.get(current_state) is not None:
-                    succ_lis = problem.heuristicInfo[current_state][:]
+                    succ_lis = problem.heuristicInfo[current_state]
                 else:
                     succ_lis = problem.getSuccessors( (current_state, foodGrid) ) #
-                    problem.heuristicInfo[current_state] = succ_lis[:]  #push 2
+                    problem.heuristicInfo[current_state] = succ_lis  #push 2
                 
                 for pair in succ_lis: 
                     if pair[0] not in explored:
                         frontier.push( (pair[0][0], path + [pair[1]]) ) # note!
     return max(distance_lis)
-    '''
+    
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -603,7 +604,29 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        food_list = food.asList()
+        wall_list = walls.asList()
+
+        frontier = util.Queue()
+        current_state = problem.getStartState()
+        frontier.push( (current_state, []) )   #a node is composed of a state and a path to start node
+        explored = []
+        
+        while(not frontier.isEmpty()):
+            current_node = frontier.pop()
+            current_state, path = current_node
+            if current_state not in explored:
+                explored.append(current_state)
+                if current_state in food_list:
+                    return path
+                
+                succ_lis = problem.getSuccessors(current_state)
+                #succ_lis.reverse()
+                for pair in succ_lis: 
+                    if pair[0] not in explored:
+                        frontier.push( (pair[0], path + [pair[1]]) )
+    
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -630,6 +653,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         self.startState = gameState.getPacmanPosition()
         self.costFn = lambda x: 1
         self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
+
+        self.heuristicInfo={}
 
     def isGoalState(self, state):
         """
