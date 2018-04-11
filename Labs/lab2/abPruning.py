@@ -3,6 +3,7 @@
 Created on Tue Apr  4 21:42:24 2017
 
 @author: Ting
+@modified: Ao Wang, 15300240004
 """
 
 inf = 999999999
