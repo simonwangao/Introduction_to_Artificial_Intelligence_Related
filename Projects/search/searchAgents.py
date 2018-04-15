@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import random
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -368,7 +369,9 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     #return 0 # Default to trivial solution
-    # recursively find the corner that has the shortest path to current node
+    #recursively find the corner that has the shortest path to current node
+    #it is NOT optimal to do so while using real completion cost, 
+    #but consistent using manhattan distance
     current_node, left_corners = state
     left_corners = list(left_corners)
     value = 0
@@ -445,7 +448,40 @@ class AStarFoodSearchAgent(SearchAgent):
     def __init__(self):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
-            
+
+def DP(position, food_list, problem, path_matrix, feasible_position_list):
+    res_list = []
+    #to decide whether we already have the result
+    food_list.sort()
+    if problem.heuristicInfo.get( (position, tuple(food_list)) ) is not None:
+        return problem.heuristicInfo[(position, tuple(food_list))]
+    
+    a = feasible_position_list.index(position)
+
+    #marginal situation
+    if len(food_list) == 1:
+        b = feasible_position_list.index(food_list[0])
+        return path_matrix[a][b]
+    
+    min_res = 999999999
+    
+    for food in food_list:
+        tmp_list = food_list[:]
+        tmp_list.remove(food)
+        tmp_list.sort()
+
+        b = feasible_position_list.index(food)
+        if path_matrix[a][b] >=min_res: #pruning
+            continue
+        res = path_matrix[a][b] + DP(food, tmp_list, problem, path_matrix, feasible_position_list)
+        min_res = min(res, min_res)
+        res_list.append(res)
+    
+    res = min(res_list)
+    problem.heuristicInfo[(position, tuple(food_list))] = res   #push
+    return res
+
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -476,71 +512,27 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    # query 'problem'
-    # store things in problem.heuristicInfo as a dict
-    # the coordinates are just like x-y coordinates
 
-    # Dynamic Programming?
+    #find the food dot that is the most far away by BFS
+    food_list = foodGrid.asList()
+    top, right = problem.walls.height-1, problem.walls.width-1
 
-    # the evaluated value has to be a lower bound of real cost,
-    # but the closer the better,
-    # in that the closer, the more precise of the evaluation,
-    # then the mistaking actions will be less
+    start_position, start_foodGrid = problem.start
+    start_food_list = start_foodGrid.asList()
 
-    # the algorithm below can solve mediumSearch in 0.3s, but it is WRONG!!!
-    # in that go to the nearest food everytime is NOT optimal
-    
-    food_list = foodGrid.asList()   #the coordinates of food
+    if len(food_list) == 0:
+        return 0
+    #get wall list
     if problem.heuristicInfo.get('wall_list_key') is not None:
         wall_list = problem.heuristicInfo['wall_list_key']
     else:
         wall_list = problem.walls.asList()  #the coordinates of walls
         problem.heuristicInfo['wall_list_key'] = wall_list
-    '''
-    val = 0
-    current_state = position    #remeber to update
-    while(len(food_list) != 0):
-        start_state = current_state
-        if problem.heuristicInfo.get( (start_state, 'shortest') ) is not None:
-            tmp = problem.heuristicInfo[ (start_state, 'shortest') ]
-            if tmp[0] in food_list:
-                current_state = tmp[0][:]
-                val += tmp[1]
-                food_list.remove(tmp[0])
-                continue
-        frontier = util.Queue()
-        frontier.push( (current_state, []) )   
-        explored = []
-        
-        while(not frontier.isEmpty()):
-            current_node = frontier.pop()
-            current_state, path = current_node  #update current_state
-            if current_state not in explored:
-                explored.append(current_state)
-                if current_state in food_list:
-                    food_list.remove(current_state)
-                    val += len(path)
-                    problem.heuristicInfo[ (start_state, 'shortest') ] = (current_state, len(path)) #push 1
-                    break
-                
-                #succ_lis = problem.getSuccessors(current_state)
-                if problem.heuristicInfo.get(current_state) is not None:
-                    succ_lis = problem.heuristicInfo[current_state]
-                else:
-                    succ_lis = problem.getSuccessors( (current_state, foodGrid) ) #
-                    problem.heuristicInfo[current_state] = succ_lis #push 2
-                
-                for pair in succ_lis: 
-                    if pair[0] not in explored:
-                        frontier.push( (pair[0][0], path + [pair[1]]) ) #
-    return val
-    '''
     
-    #position, foodGrid = state, food_list, wall_list
-    # state is always a tuple od coordiantes
     if len(food_list) == 0:
         return 0
 
+    
     distance_lis = [] # remember to append
     for food in food_list:
         if problem.heuristicInfo.get( (position, food) ) is not None:
@@ -573,6 +565,45 @@ def foodHeuristic(state, problem):
                         frontier.push( (pair[0][0], path + [pair[1]]) ) # note!
     return max(distance_lis)
     
+    '''
+    #using Dynamic Programming
+
+    #get all feasible positions
+    if problem.heuristicInfo.get('position_list_key') is not None:
+        feasible_position_list = problem.heuristicInfo['position_list_key']
+    else:
+        feasible_position_list = []
+        for i in range(1, right):
+            for j in range(1, top):
+                if (i,j) not in wall_list:
+                    feasible_position_list.append( (i,j) )
+        problem.heuristicInfo['position_list_key'] = feasible_position_list
+    
+    #start Floyd-Warshall
+    if problem.heuristicInfo.get('floyd_warshall') is not None:
+        path_matrix = problem.heuristicInfo['floyd_warshall']
+    else:
+        inf = 99999999999
+        length = len(feasible_position_list)
+        path_matrix = [[inf for i in range(length)] for j in range(length)]
+        for i in range(length):
+            for j in range(length):
+                if util.manhattanDistance(feasible_position_list[i], feasible_position_list[j]) == 1.0:
+                    path_matrix[i][j] = 1
+                    path_matrix[j][i] = 1
+                if i == j:
+                    path_matrix[i][i] = 0
+        #start Floyd-Warshall algorithm
+        for k in range(length):
+            for i in range(length):
+                for j in range(length):
+                    if path_matrix[i][j] > path_matrix[i][k] + path_matrix[k][j]:
+                        path_matrix[i][j] = path_matrix[i][k] + path_matrix[k][j]
+        problem.heuristicInfo['floyd_warshall'] = path_matrix
+    
+    res = DP(position, food_list, problem, path_matrix, feasible_position_list)
+    return res
+    '''
 
 
 class ClosestDotSearchAgent(SearchAgent):
