@@ -2,7 +2,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[paper=a4, fontsize=12pt]{scrartcl} % A4 paper and 12pt font size
+\documentclass[paper=a4, fontsize=10pt]{scrartcl} % A4 paper and 10pt font size
 
 \usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
 %\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
@@ -65,17 +65,84 @@
 
 \begin{document}
 
-\begin{spacing}{1.1}
+\begin{spacing}{1.}
 
 \maketitle % Print the title
 
 %----------------------------------------------------------------------------------------
 \section{Overview}
-This project is about solving Black Jack using MDPs. This pdf is the answers of the required questions.
+This project is about solving Black Jack using MDPs. This pdf contains the answers of the required questions.
 
 \section{Problem 1}
 \subsection{Problem 1a}
+As required by the instructions, the state -2 and 2 are the exits, so we manually set the $V_{opt}(s)$ of them to a fixed number, which is 0. Then the results are as follows:
+\begin{table}[h]
+\setlength{\abovecaptionskip}{0.cm}
+\setlength{\belowcaptionskip}{-0.cm}
+\centering
+  \caption{The result of 1st value iteration (after 0 iterations).}
+  %\label{tab:test}
+  \begin{tabular}{|c|c|c|c|c|c|}
+     \hline
+    State $s$ & -2 & -1 & 0 & 1 & 2\\
+     \hline
+    $V_{opt}(s)$ & 0.0 & \textbf{11.0} & \textbf{-5.0} & \textbf{25.0} & 0.0\\
+     \hline
+  \end{tabular}
+\end{table}
 
+\begin{table}[h]
+\setlength{\abovecaptionskip}{0.cm}
+\setlength{\belowcaptionskip}{-0.cm}
+\centering
+  \caption{The result of 2nd value iteration (after 1 iterations).}
+  %\label{tab:test}
+  \begin{tabular}{|c|c|c|c|c|c|}
+     \hline
+    State $s$ & -2 & -1 & 0 & 1 & 2\\
+     \hline
+    $V_{opt}(s)$ & 0.0 & \textbf{10.0} & \textbf{10.2} & \textbf{21.5} & 0.0\\
+     \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[h]
+\setlength{\abovecaptionskip}{0.cm}
+\setlength{\belowcaptionskip}{-0.cm}
+\centering
+  \caption{The result of 3rd value iteration (after 2 iterations).}
+  %\label{tab:test}
+  \begin{tabular}{|c|c|c|c|c|c|}
+     \hline
+    State $s$ & -2 & -1 & 0 & 1 & 2\\
+     \hline
+    $V_{opt}(s)$ & 0.0 & \textbf{13.04} & \textbf{8.45} & \textbf{32.14} & 0.0\\
+     \hline
+  \end{tabular}
+\end{table}
+
+\subsection{Problem 1b}
+After the iteration is converged, the result of $\pi_{opt}$ is as follows:
+\begin{table}[!htbp]
+\setlength{\abovecaptionskip}{0.cm}
+\setlength{\belowcaptionskip}{-0.cm}
+\centering
+  \caption{The result of the optimal actions after being converged.}
+  %\label{tab:test}
+  \begin{tabular}{|c|c|c|c|c|c|}
+     \hline
+    State $s$ & -2 & -1 & 0 & 1 & 2\\
+     \hline
+    $\pi_{opt}(s)$ & - & \textbf{-1} & \textbf{+1} & \textbf{+1} & -\\
+     \hline
+  \end{tabular}
+\end{table}
+
+The result is pretty clear because the agent tries to get to the exit as soon as possible as the reward of each step is negative and both of the exits have comparatively high positive rewards. But at state 0, agent will have higher expectation by moving +1, although it has a high possibility of moving -1.
+
+\section{Problem 2}
+\subsection{Problem 2a}
+According to the instruction, the transition (probability) has been changed with noise, with a probability to randomly change to a possible reachable state. We can find a counter example that $V_{1}(s_{start}) \le V_{2}(s_{start})$. 
 
 %----------------------------------------------------------------------------------------
 

@@ -10,27 +10,31 @@ from util import ValueIteration
 class CounterexampleMDP(util.MDP):
     def startState(self):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        
         # END_YOUR_CODE
 
     # Return set of actions possible from |state|.
     def actions(self, state):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+
         # END_YOUR_CODE
 
     # Return a list of (newState, prob, reward) tuples corresponding to edges
     # coming out of |state|.
     def succAndProbReward(self, state, action):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+
         # END_YOUR_CODE
 
     def discount(self):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
-        # END_YOUR_CODE
+        #raise Exception("Not implemented yet")
 
+        # END_YOUR_CODE
+'''
 ############################################################
 # Problem 3a
 
@@ -180,3 +184,4 @@ originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peek
 # New threshold
 newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
 
+'''

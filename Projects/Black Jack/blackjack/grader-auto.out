@@ -1,6 +1,6 @@
-fatalError: true
+fatalError: false
 maxTotalPoints: 30
-messages: ['Threw exception when importing ''submission'': Not implemented yet']
+messages: []
 mode: auto
 parts:
 - description: ''
@@ -26,7 +26,7 @@ parts:
   maxSeconds: 5
   messages: []
   name: 3a-basic
-  points: 0
+  points: 5
   seconds: 0
 - description: Hidden test for ValueIteration. Run ValueIteration on BlackjackMDP,
     then test if V[startState] is correct.
@@ -44,7 +44,7 @@ parts:
   maxSeconds: 5
   messages: []
   name: 3b-basic
-  points: 0
+  points: 4
   seconds: 0
 - description: Basic test for incorporateFeedback() using NumberLineMDP.
   extraCredit: false
@@ -52,7 +52,7 @@ parts:
   maxSeconds: 10
   messages: []
   name: 4a-basic
-  points: 0
+  points: 5
   seconds: 0
 - description: Hidden test for incorporateFeedback(). Run QLearningAlgorithm on smallMDP,
     then ensure that getQ returns reasonable value.
@@ -70,6 +70,6 @@ parts:
   maxSeconds: 10
   messages: []
   name: 4c-basic
-  points: 0
+  points: 5
   seconds: 0
-totalPoints: 0
+totalPoints: 19

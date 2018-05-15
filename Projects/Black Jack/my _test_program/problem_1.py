@@ -21,8 +21,8 @@ action_realaction_possibility = {   #define the possibilities
 
 while(iteration == 0 or difference > epsilon):
     
-    '''if iteration == 2:
-        print (actions)
+    '''if iteration == 3:
+        #print (actions)
         print (values)'''
 
     difference = 0.
@@ -41,4 +41,5 @@ while(iteration == 0 or difference > epsilon):
 
     iteration+=1
 
-print(actions)
+print (actions)
+#print (values)
