@@ -11,14 +11,19 @@ class CounterexampleMDP(util.MDP):
     def startState(self):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
         #raise Exception("Not implemented yet")
-        
+        return 0
         # END_YOUR_CODE
 
     # Return set of actions possible from |state|.
     def actions(self, state):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
         #raise Exception("Not implemented yet")
-
+        if state == 0:
+            return [-1]
+        if state == 1:
+            return [-2]
+        if state == -1: #exit
+            return [0]
         # END_YOUR_CODE
 
     # Return a list of (newState, prob, reward) tuples corresponding to edges
@@ -26,15 +31,32 @@ class CounterexampleMDP(util.MDP):
     def succAndProbReward(self, state, action):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
         #raise Exception("Not implemented yet")
-
+        if state == 0:
+            t0_original = 0 # original one has no chance to get to state 0 with positive reward
+            t1_original = 0 # original one has no chance to get to state 1 with high reward
+            t_1_original = 1 # original one will definitely go to state -1 with low reward
+            t1 = 0.5 * t1_original + 0.5 * 1./3.    # it now has chance to go to a state with high reward
+            t_1 = 0.5 * t_1_original + 0.5 * 1./3.
+            t0 = 0.5 * t0_original + 0.5 * 1./3.
+            return [(-1, t_1, -20), (1, t1, 20), (0, t0, 10)]
+        if state == 1:
+            t1_original = 0 # the original one will have no possibility to go to state 1 with high reward
+            t_1_original = 1 # the original one will definitely go to state -1 with low reward
+            t0_original = 0 # the original one will have no possibility to go to state 0 with positive reward
+            t_1 = 0.5 * t_1_original + 0.5 * 1./3.
+            t0 = 0.5 * t0_original + 0.5 * 1./3.
+            t1 = 0.5 * t1_original + 0.5 * 1./3. # it now has chance to go to a state with high reward
+            return [(-1, t_1, -20), (0, t0, 10), (1, t1, 20)]
+        if state == -1:
+            return []
         # END_YOUR_CODE
 
     def discount(self):
         # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
         #raise Exception("Not implemented yet")
-
+        return 1.0
         # END_YOUR_CODE
-'''
+
 ############################################################
 # Problem 3a
 
@@ -184,4 +206,3 @@ originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peek
 # New threshold
 newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
 
-'''
