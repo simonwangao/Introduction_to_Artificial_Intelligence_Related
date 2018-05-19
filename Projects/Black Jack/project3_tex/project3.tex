@@ -188,7 +188,7 @@ $V$: the optimal values of all states
 			\State \textbf{Break}
 		\EndIf
 	\EndFor
-	\State value\_list $= []$    \texttt{//carry out DP}
+	\State value\_list $= [ ]$    \texttt{//carry out DP}
 	\For {$s' \in Ancestor(s)$}    \texttt{//value iteration}
 		\State value\_list.\textit{append}(($a, R(s') + \gamma T(s', a, s)V(s)$)) \texttt{//the triple is used only once}
 	\EndFor
@@ -201,10 +201,29 @@ $V$: the optimal values of all states
 The basic rationale of this DP algorithm is pretty simple by calculating the optimal value of each state one by one. Note that there is a key procedure to ensure all of the ancestor states of the feasible state are settled in that the DP needs all of its ancestors' optimal values. Take the example of Figure \ref{fig:acy_MDP}. After settling the start state 12, we can go to 11 or 10. But one of the ancestor of state 10 is 11 and the value of state 11 is not settled yet, so I have to choose state 11 as the next state to carry out DP. I ensure every $(s', a, s)$ triple is used only once by using a list to record every unexplored state. During the explore of each state $s$, the ancestor state $s'$ is explored only once. As a consequence, the state $s$ and $s'$ are used together only once, thus the $(s', a, s)$ triple is used only once.
 
 \subsection{Problem 2c}
+As we can see from the Bellman equation:
 
+\begin{equation}
+V_{opt}(s) := R(s) + \gamma \max \limits_{a \in A(s)} \sum_{s'} T(s, a, s')V_{opt}(s')
+\end{equation}
 
+The discount factor $\gamma$ multiplies the product of $T(s, a, s')$ and $V_{opt}(s')$, so after adding a new state $o$, we can change the $T(s, a, s')$ and $R(s, a, s')$ as follows:
 
+\begin{displaymath}
+\left\{
+\begin{array}{rl}
+T'(s, a, s')&= \ \gamma T(s, a, s') \ if \ s' \ne o\\
+T'(s, a, o)&= \ 1 - \gamma\\
+Reward'(s, a, s')&= \ Reward(s, a, s') \ if \ s' \ne o\\
+Reward'(s, a, o)&= \ \sum_{s' \in States} T(s, a, s')Reward(s, a, s')
+\end{array}
+\right.
+\end{displaymath}
 
+The basic idea is that if we add discount factor $\gamma < 1$ in the value iteration based on original MDP solver, the left losing part should be compensated by the virtual state $o$.
+
+\section{Problem 3}
+\subsection{Problem 3a}
 
 
 

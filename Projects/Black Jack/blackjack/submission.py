@@ -96,12 +96,68 @@ class BlackjackMDP(util.MDP):
     # in the list returned by succAndProbReward.
     def succAndProbReward(self, state, action):
         # BEGIN_YOUR_CODE (our solution is 53 lines of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        current_value, top_card, old_deck = state
+        if old_deck is None or sum(old_deck) == 0:  #exit by empty actions
+            return []
+
+        if action == 'Quit':
+            new_state = (current_value, None, None)
+            return [(new_state, 1.0, current_value)]    #current value as the reward
+        
+        if action == 'Peek':
+            if top_card is not None:    #can not continually peek
+                return []
+            num = sum(old_deck)
+            res = []
+            for i in range(len(self.cardValues)):
+                if old_deck[i] > 0: # not be zero
+                    new_state = (current_value, i, old_deck)
+                    res.append( (new_state, float(old_deck[i])/num, -self.peekCost) )
+            return res
+        
+        if action == 'Take':
+            if top_card is not None:
+                new_value = current_value + self.cardValues[top_card]   # last turn is peeked, so the result is settled
+                if new_value <= self.threshold:
+                    deck = list(old_deck[:])
+                    deck[top_card] -= 1
+                    deck = tuple(deck)
+                    if sum(deck) != 0:
+                        new_state = (new_value, None, deck) #still cards left
+                        return [(new_state, 1.0, 0)]
+                    else:
+                        new_state = (new_value, None, None) #no card left
+                        return [(new_state, 1.0, new_state[0])]
+                else:
+                    new_state = (new_value, None, None) #strictly greater than the threshold
+                    return [(new_state, 1.0, 0)]
+            
+            res_lis = []
+            num = sum(old_deck)
+            for i in range(len(self.cardValues)):
+                if old_deck[i] != 0: #still have cards
+                    new_value = current_value + self.cardValues[i]
+                    if new_value <= self.threshold:
+                        new_deck = list(old_deck[:])
+                        new_deck[i] -= 1
+                        new_deck = tuple(new_deck)
+                        if sum(new_deck) != 0:
+                            new_state = (new_value, None, new_deck)
+                            res_lis.append((new_state, float(old_deck[i])/num, 0))  # normal
+                        else:
+                            new_state = (new_value, None, None)
+                            res_lis.append((new_state, float(old_deck[i])/num, new_state[0]))
+                    else:
+                        new_state = (new_value, None, None)
+                        res_lis.append((new_state, float(old_deck[i])/num, 0))  #
+            return res_lis
+
         # END_YOUR_CODE
 
     def discount(self):
         return 1
-
+'''
 ############################################################
 # Problem 3b
 
@@ -206,3 +262,4 @@ originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peek
 # New threshold
 newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
 
+'''

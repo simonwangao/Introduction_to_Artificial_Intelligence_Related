@@ -24,21 +24,16 @@ parts:
   extraCredit: false
   maxPoints: 5
   maxSeconds: 5
-  messages: ['Exception thrown: <type ''exceptions.AttributeError''> -- ''module''
-      object has no attribute ''BlackjackMDP''', "  File \"grader.py\", line 65, in\
-      \ test3a\n    mdp1 = submission.BlackjackMDP(cardValues=[1, 5], multiplicity=2,\n"]
+  messages: []
   name: 3a-basic
-  points: 0
+  points: 5
   seconds: 0
 - description: Hidden test for ValueIteration. Run ValueIteration on BlackjackMDP,
     then test if V[startState] is correct.
   extraCredit: false
   maxPoints: 5
   maxSeconds: 5
-  messages: ['Exception thrown: <type ''exceptions.AttributeError''> -- ''module''
-      object has no attribute ''BlackjackMDP''', "  File \"grader.py\", line 93, in\
-      \ test3aHidden\n    mdp = submission.BlackjackMDP(cardValues=[1, 3, 5, 8, 10],\
-      \ multiplicity=3,\n"]
+  messages: []
   name: 3a-hidden
   points: 0
   seconds: 0
@@ -78,9 +73,9 @@ parts:
   maxPoints: 5
   maxSeconds: 10
   messages: ['Exception thrown: <type ''exceptions.AttributeError''> -- ''module''
-      object has no attribute ''BlackjackMDP''', "  File \"grader.py\", line 150,\
-      \ in test4c\n    mdp = submission.BlackjackMDP(cardValues=[1, 5], multiplicity=2,\n"]
+      object has no attribute ''QLearningAlgorithm''', "  File \"grader.py\", line\
+      \ 153, in test4c\n    rl = submission.QLearningAlgorithm(mdp.actions, mdp.discount(),\n"]
   name: 4c-basic
   points: 0
   seconds: 0
-totalPoints: 0
+totalPoints: 5
