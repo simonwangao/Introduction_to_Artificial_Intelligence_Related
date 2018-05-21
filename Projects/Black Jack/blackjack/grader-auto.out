@@ -42,21 +42,17 @@ parts:
   extraCredit: false
   maxPoints: 4
   maxSeconds: 5
-  messages: ['Exception thrown: <type ''exceptions.AttributeError''> -- ''module''
-      object has no attribute ''peekingMDP''', "  File \"grader.py\", line 102, in\
-      \ test3b\n    mdp = submission.peekingMDP()\n"]
+  messages: []
   name: 3b-basic
-  points: 0
+  points: 4
   seconds: 0
 - description: Basic test for incorporateFeedback() using NumberLineMDP.
   extraCredit: false
   maxPoints: 5
   maxSeconds: 10
-  messages: ['Exception thrown: <type ''exceptions.AttributeError''> -- ''module''
-      object has no attribute ''QLearningAlgorithm''', "  File \"grader.py\", line\
-      \ 119, in test4a\n    rl = submission.QLearningAlgorithm(mdp.actions, mdp.discount(),\n"]
+  messages: []
   name: 4a-basic
-  points: 0
+  points: 5
   seconds: 0
 - description: Hidden test for incorporateFeedback(). Run QLearningAlgorithm on smallMDP,
     then ensure that getQ returns reasonable value.
@@ -72,10 +68,8 @@ parts:
   extraCredit: false
   maxPoints: 5
   maxSeconds: 10
-  messages: ['Exception thrown: <type ''exceptions.AttributeError''> -- ''module''
-      object has no attribute ''QLearningAlgorithm''', "  File \"grader.py\", line\
-      \ 153, in test4c\n    rl = submission.QLearningAlgorithm(mdp.actions, mdp.discount(),\n"]
+  messages: []
   name: 4c-basic
-  points: 0
+  points: 5
   seconds: 0
-totalPoints: 5
+totalPoints: 19

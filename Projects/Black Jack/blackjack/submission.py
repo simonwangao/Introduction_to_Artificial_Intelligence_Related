@@ -157,7 +157,7 @@ class BlackjackMDP(util.MDP):
 
     def discount(self):
         return 1
-'''
+
 ############################################################
 # Problem 3b
 
@@ -167,7 +167,9 @@ def peekingMDP():
     least 10% of the time.
     """
     # BEGIN_YOUR_CODE (our solution is 2 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    #raise Exception("Not implemented yet")
+    mdp = BlackjackMDP(cardValues=[2,3,4,15], multiplicity=3, threshold=20, peekCost=1)
+    return mdp
     # END_YOUR_CODE
 
 ############################################################
@@ -215,7 +217,19 @@ class QLearningAlgorithm(util.RLAlgorithm):
     # self.getQ() to compute the current estimate of the parameters.
     def incorporateFeedback(self, state, action, reward, newState):
         # BEGIN_YOUR_CODE (our solution is 12 lines of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        if newState is not None:    # not the terminal state
+            max_ = max(self.getQ(newState, new_action) for new_action in self.actions(newState))    # the max Q(s', a')
+            sample = reward + self.discount * max_  # reward + gamma * max( Q(s', a') )
+        else:
+            sample = reward # the terminal state, only reward
+        
+        alpha = self.getStepSize()  # the learning rate, getting smaller every time
+        old_Q = self.getQ(state, action)    # the old Q value
+
+        # NOTE: the feature is actually the value of Q(s, a)
+        for f, v in self.featureExtractor(state, action):
+            self.weights[f] = (1 - alpha)*self.weights[f] + alpha*sample    # standard Q-learning
         # END_YOUR_CODE
 
 # Return a singleton list containing indicator feature for the (state, action)
@@ -227,13 +241,49 @@ def identityFeatureExtractor(state, action):
 
 ############################################################
 # Problem 4b: convergence of Q-learning
-# Small test case
-smallMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
+def test1():
+    '''
+    The reason of high error rate is that
+    the learning rate is fixedly related to the number of iterations,
+    so the learning rate may turn to 0 before the Q-learning is converged
+    '''
+    # Small test case
+    smallMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
+    smallMDP.computeStates()
 
-# Large test case
-largeMDP = BlackjackMDP(cardValues=[1, 3, 5, 8, 10], multiplicity=3, threshold=40, peekCost=1)
-largeMDP.computeStates()
+    # Large test case
+    largeMDP = BlackjackMDP(cardValues=[1, 3, 5, 8, 10], multiplicity=3, threshold=40, peekCost=1)
+    largeMDP.computeStates()
 
+    mdp = largeMDP  #change
+    rl = QLearningAlgorithm(mdp.actions, mdp.discount(),
+                                        identityFeatureExtractor,
+                                        0.2)
+    
+    # start value iteration
+    vl = util.ValueIteration()
+    vl.solve(mdp)
+    vl_policy_dic = vl.pi
+    #print (vl_policy_dic)
+
+    # start Q-learning
+    res = util.simulate(mdp, rl, numTrials=30000)
+    rl_policy_dic = {}
+    rl.explorationProb = 0.0
+    for key in vl_policy_dic:
+        rl_policy_dic[key] = rl.getAction(key)
+
+    flag = 'Yes!'
+    wrong = 0
+    for key in rl_policy_dic:
+        if key[2] is not None:
+            if rl_policy_dic[key] != vl_policy_dic[key]:
+                flag = 'No!'
+                wrong += 1
+    print ('With original identityFeatureExtractor:')
+    print (flag, wrong)
+    print (len(rl_policy_dic))
+    print ('\n')
 
 
 ############################################################
@@ -250,8 +300,53 @@ largeMDP.computeStates()
 def blackjackFeatureExtractor(state, action):
     total, nextCard, counts = state
     # BEGIN_YOUR_CODE (our solution is 9 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    #raise Exception("Not implemented yet")
+    res = []
+    # 1st indicator:
+    res.append( ((total, action), 1.0) )
+    # 2nd indicator:
+    if counts is not None:
+        tup = tuple([1 if num else 0 for num in counts])
+        res.append( ((tup, action), 1.0) )
+    # 3rd indicator:
+    if counts is not None:
+        for i in range(len(counts)):
+            res.append( ((i, counts[i], action), 1.0) )
+    return res
     # END_YOUR_CODE
+
+def test2():
+    # test on largeMDP
+    largeMDP = BlackjackMDP(cardValues=[1, 3, 5, 8, 10], multiplicity=3, threshold=40, peekCost=1)
+    largeMDP.computeStates()
+
+    mdp = largeMDP
+    rl = QLearningAlgorithm(mdp.actions, mdp.discount(),
+                                        blackjackFeatureExtractor,
+                                        0.2)
+
+    # start value iteration
+    vl = util.ValueIteration()
+    vl.solve(mdp)
+    vl_policy_dic = vl.pi
+
+    # start Q-learning
+    res = util.simulate(mdp, rl, numTrials=30000)
+    rl_policy_dic = {}
+    rl.explorationProb = 0.0
+    for key in vl_policy_dic:
+        rl_policy_dic[key] = rl.getAction(key)
+
+    flag = 'Yes!'
+    wrong = 0
+    for key in rl_policy_dic:
+        if key[2] is not None:
+            if rl_policy_dic[key] != vl_policy_dic[key]:
+                flag = 'No!'
+                wrong += 1
+    print ('With blackjackFeatureExtractor:')
+    print (flag, wrong)
+    print (len(rl_policy_dic))
 
 ############################################################
 # Problem 4d: What happens when the MDP changes underneath you?!
@@ -262,4 +357,8 @@ originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peek
 # New threshold
 newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
 
-'''
+
+
+if __name__ == '__main__':
+    test1()
+    test2()

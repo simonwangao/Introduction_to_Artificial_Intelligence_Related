@@ -224,6 +224,30 @@ The basic idea is that if we add discount factor $\gamma < 1$ in the value itera
 
 \section{Problem 3}
 \subsection{Problem 3a}
+Simply follow the instructions to build the MDP. Notice that the probability is actually the probability of this number being taken, which is $\frac{\# \ of \ this \ number}{\# \ of \ all \ numbers}$.
+\subsection{Problem 3b}
+It's rather easy to design a deck to make people peek a lot. The basic idea is that if it's very easy to exceed the threshold to get 0 reward, the number of peek optimal action will increase to see if it's going to exceed. To accomplish this goal, it only need to add a rather big number, say 15, to the deck to make it easy to exceed the threshold 20.
+
+\section{Problem 4}
+\subsection{Problem 4a}
+To implement a standard Q-learning process.
+
+\subsection{Problem 4b}
+The test code is in \texttt{submission.py} in function \texttt{test1}. Run \texttt{submission.py} directly to see the results.
+
+Compared the result policies from Q-learning with 30,000 iterations and from value iteration, the conclusions are as follows. In \texttt{smallMDP}, the results from Q-learning simulation is nearly the same with value iteration, with only 0/1/2/3 wrong results out of 27 states. After many tries, the number of correct optimal policy is pretty high, although it can not guarantee an absolute correctness in an experiment. However, in \texttt{largeMDP}, the error rate is very high, about 800\~{}900/2745, even with an iteration of 30,000 rounds. 
+
+The reason may be that the learning rate is \textbf{fixedly} related to the number of iteration (as we can see from the function \texttt{getStepSize}). As a consequence, when it comes to a large MDP that needs many iterations to converge, the learning rate may quickly reduce to 0 (not taking information from new iterations any more) before the Q-learning is converged.
+
+\subsection{Problem 4c}
+Just follow the instructions to extract features from current state.
+
+After the completion of function \texttt{blackjackFeatureExtractor}, I implement the test code in \texttt{test2}. The error rate reduces indeed.
+
+\subsection{Problem 4d}
+
+
+
 
 
 
