@@ -351,14 +351,33 @@ def test2():
 ############################################################
 # Problem 4d: What happens when the MDP changes underneath you?!
 
-# Original mdp
-originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
+def test3():
+    # Original mdp
+    originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
 
-# New threshold
-newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
+    # New threshold
+    newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
+
+    # start value iteration
+    vl = util.ValueIteration()
+    vl.solve(originalMDP)
+    vl_policy_dic = vl.pi
+
+    fixed_RL = util.FixedRLAlgorithm(vl_policy_dic)
+    res = util.simulate(newThresholdMDP, fixed_RL, numTrials=300)
+    print (res)
+
+    # start Q-learning
+    mdp = newThresholdMDP
+    rl = QLearningAlgorithm(mdp.actions, mdp.discount(),
+                                        blackjackFeatureExtractor,
+                                        0.2)
+    res = util.simulate(mdp, rl, numTrials=300)
+    print (res)
 
 
 
 if __name__ == '__main__':
     test1()
     test2()
+    test3()

@@ -198,7 +198,7 @@ $V$: the optimal values of all states
 \end{algorithmic} 
 \end{algorithm}
 
-The basic rationale of this DP algorithm is pretty simple by calculating the optimal value of each state one by one. Note that there is a key procedure to ensure all of the ancestor states of the feasible state are settled in that the DP needs all of its ancestors' optimal values. Take the example of Figure \ref{fig:acy_MDP}. After settling the start state 12, we can go to 11 or 10. But one of the ancestor of state 10 is 11 and the value of state 11 is not settled yet, so I have to choose state 11 as the next state to carry out DP. I ensure every $(s', a, s)$ triple is used only once by using a list to record every unexplored state. During the explore of each state $s$, the ancestor state $s'$ is explored only once. As a consequence, the state $s$ and $s'$ are used together only once, thus the $(s', a, s)$ triple is used only once.
+The basic rationale of this DP algorithm is pretty simple by calculating the optimal value of each state one by one. Note that there is a key procedure to ensure all of the ancestor states of the feasible state are settled in that the DP needs all of its ancestors' optimal values. Take the example of Figure \ref{fig:acy_MDP}. After settling the start state 12, it can go to 11 or 10. But one of the ancestor of state 10 is 11 and the value of state 11 is not settled yet, so I have to choose state 11 as the next state to carry out DP. I ensure every $(s', a, s)$ triple is used only once by using a list to record every unexplored state. During the explore of each state $s$, the ancestor state $s'$ is explored only once. As a consequence, the state $s$ and $s'$ are used together only once, thus the $(s', a, s)$ triple is used only once.
 
 \subsection{Problem 2c}
 As we can see from the Bellman equation:
@@ -242,10 +242,12 @@ The reason may be that the learning rate is \textbf{fixedly} related to the numb
 \subsection{Problem 4c}
 Just follow the instructions to extract features from current state.
 
-After the completion of function \texttt{blackjackFeatureExtractor}, I implement the test code in \texttt{test2}. The error rate reduces indeed.
+After the completion of function \texttt{blackjackFeatureExtractor}, I implement the test code in \texttt{test2}. The error rate is reduced indeed.
 
 \subsection{Problem 4d}
+If we apply the policies learned in \texttt{originalMDP} to \texttt{newThresholdMDP}, from the awards acquired by \texttt{simulate} the most appearing reward is \textbf{6}. But if I use Q-learning to solve \texttt{newThresholdMDP} directly, the most appearing reward is \textbf{12}.
 
+The reason of this phenomenon is that the best reward is to get close to the threshold as close as possible without exceeding it. In \texttt{originalMDP}, we have card values of 1 and 5, with the threshold being 10, so apparently the optimal reward will be 6. The only difference between \texttt{originalMDP} and \texttt{newThresholdMDP} is that the new threshold is 15, so if we apply the original policy directly, the reward will still be 6. But if we calculate the real optimal reward using Q-learning, the result will be 12 with the threshold of 15.
 
 
 
