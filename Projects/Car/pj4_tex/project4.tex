@@ -1,0 +1,160 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=10pt]{scrartcl} % A4 paper and 10pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{algpseudocode}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}} % Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{\textbf{Output:}} % Use Output in the format of Algorithm
+\usepackage{color}
+\usepackage[colorlinks, linkcolor=black]{hyperref}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{amsfonts,amssymb}
+
+
+\usepackage{geometry}
+\geometry{scale=0.8}
+
+ \usepackage{setspace}
+
+
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{sectsty} % Allows customizing section commands
+%\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{0pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+%\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\textsc{Fudan University, Artificial Intelligence} \\ [0pt] % Your university, school and/or department name(s)
+\horrule{1pt} \\[0.4cm] % Thin top horizontal rule
+\LARGE Report on Project 4: Driverless Car \\ % The assignment title
+\horrule{1pt} \\[0cm] % Thick bottom horizontal rule
+}
+
+\author{Ao Wang, 15300240004} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\begin{spacing}{1.}
+
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+
+\section{Overview}
+In this project, we use HMM to solve driverless car problems.
+
+\section{Problem 1}
+\subsection{Problem 1a}
+According to the constraints given by the instruction,
+\begin{displaymath}
+\begin{aligned}
+\mathbb{P}(C_{2}=1|D_{2}=0) & = \frac{\mathbb{P}(C_{2}=1, D_{2}=0)}{\mathbb{P}(D_{2}=0)} \\
+&= \frac{\mathbb{P}(D_{2}=0|C_{2}=1) \mathbb{P}(C_{2}=1)}{\mathbb{P}(D_{2}=0)}\\
+\end{aligned}
+\end{displaymath}
+
+And we have
+\begin{displaymath}
+\begin{aligned}
+\mathbb{P}(C_{2}=1) &= \mathbb{P}(C_{1}=0)\mathbb{P}(C_{2}=1|C_{1}=0) + \mathbb{P}(C_{1}=1)\mathbb{P}(C_{2}=1|C_{1}=1)\\
+& = 0.5 \epsilon + 0.5 (1 - \epsilon)\\
+& = 0.5
+\end{aligned}
+\end{displaymath}
+
+So we have
+\begin{displaymath}
+\begin{aligned}
+\mathbb{P}(C_{2}=1|D_{2}=0) &= \frac{0.5 \eta}{\mathbb{P}(D_{2}=0)}\\
+\mathbb{P}(C_{2}=0|D_{2}=0) &= \frac{0.5 (1 - \eta)}{\mathbb{P}(D_{2}=0)}
+\end{aligned}
+\end{displaymath}
+
+So the answer is
+\begin{displaymath}
+\begin{aligned}
+\mathbb{P}(C_{2}=1|D_{2}=0) &= \frac{0.5 \eta}{0.5 \eta + 0.5 (1 - \eta)}\\
+&= \eta
+\end{aligned}
+\end{displaymath}
+
+Notice that $\mathbb{P}(D_{2}=0)$ is not 1 since $\mathbb{P}(D_{2})$ is related to $\mathbb{P}(C_{2})$.
+
+\subsection{Problem 1b}
+According to the HMM graph, the result could be written as
+\begin{displaymath}
+\begin{aligned}
+&\ \ \ \ \mathbb{P}(C_{2}=1|D_{2}=0, D_{3}=1) \\
+&\propto  \mathbb{P}(C_{2}=1, D_{2}=0, D_{3}=1)\\
+&=\{\sum_{C_{1} = \{0, 1\}}\mathbb{P}(C_{1})\mathbb{P}(C_{2} = 1|C_{1})\} \cdot \mathbb{P}(D_{2}=0|C_{2}=1) \cdot \{\sum_{C_{3} = \{0, 1\}}\mathbb{P}(C_{3}|C_{2}=1)\mathbb{P}(D_{3}=1|C_{3})\}\\
+& = 0.5\eta(\epsilon\eta+(1-\epsilon)(1-\eta))
+\end{aligned}
+\end{displaymath}
+
+Also,
+\begin{displaymath}
+\begin{aligned}
+&\ \ \ \ \mathbb{P}(C_{2}=0|D_{2}=0, D_{3}=1) \\
+&\propto  \mathbb{P}(C_{2}=0, D_{2}=0, D_{3}=1)\\
+&=\{\sum_{C_{1} = \{0, 1\}}\mathbb{P}(C_{1})\mathbb{P}(C_{2} = 0|C_{1})\} \cdot \mathbb{P}(D_{2}=0|C_{2}=0) \cdot \{\sum_{C_{3} = \{0, 1\}}\mathbb{P}(C_{3}|C_{2}=0)\mathbb{P}(D_{3}=1|C_{3})\}\\
+& = 0.5(1-\eta)((1-\epsilon)\eta+\epsilon(1-\eta))
+\end{aligned}
+\end{displaymath}
+
+After normalization, the result is 
+\begin{displaymath}
+\begin{aligned}
+\mathbb{P}(C_{2}=1|D_{2}=0, D_{3}=1) = \frac{\epsilon\eta^{2} + \eta(1-\epsilon)(1-\eta)}{\epsilon\eta^{2} + 2\eta(1-\epsilon)(1-\eta) + \epsilon(1-\eta)^{2}}
+\end{aligned}
+\end{displaymath}
+
+\subsection{Problem 1c}
+\subsubsection{i}
+
+
+
+
+
+
+
+
+
+%----------------------------------------------------------------------------------------
+
+\end{spacing}
+\end{document}
