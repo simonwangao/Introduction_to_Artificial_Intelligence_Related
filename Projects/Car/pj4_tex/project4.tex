@@ -145,6 +145,64 @@ After normalization, the result is
 
 \subsection{Problem 1c}
 \subsubsection{i}
+Given $\epsilon = 0.1$ and $\eta = 0.2$, we have
+\begin{displaymath}
+\mathbb{P}(C_{2}=1|D_{2}=0) = 0.2
+\end{displaymath}
+
+\begin{displaymath}
+\mathbb{P}(C_{2}=1|D_{2}=0, D_{3}=1) \approx 0.4157
+\end{displaymath}
+The answer is round to 4 significant digits.
+
+\subsubsection{ii}
+As we can see, adding $D_{3} = 1$ making the posterior probability get higher. The reason is that both $\epsilon$ and $\eta$ are pretty small. $\epsilon$ is 0.1, meaning that $C_{2}$ and $C_{3}$ have a great probability to be the same (same car position), while $\eta$ is 0.2, meaning that $C_{3}$ and $D_{3}$ have a great probability to be the same (accurate observation). Since $D_{3} = 1$, the probability of $C_{2}$ being 1 gets higher.
+
+\subsubsection{iii}
+By solving equation
+\begin{displaymath}
+ \eta = \frac{\epsilon\eta^{2} + \eta(1-\epsilon)(1-\eta)}{\epsilon\eta^{2} + 2\eta(1-\epsilon)(1-\eta) + \epsilon(1-\eta)^{2}}
+\end{displaymath}
+when $\eta = 0.2$, we have
+\begin{displaymath}
+\epsilon = 0.5
+\end{displaymath}
+
+The result is pretty intuitive. If we set $\mathbb{P}(C_{2}=1|D_{2}=0) = \mathbb{P}(C_{2}=1|D_{2}=0, D_{3}=1)$, then it means that adding information $D_{3}=1$ won't change anything, which means $C_{2}$ will have a equal effect on $C_{3}$ (the car has a equal probability to move or not), given a fixed $\eta = 0.2$.
+
+\section{Problem 2}
+We need to implement \texttt{observe} function in this problem. As we know that
+\begin{equation}
+\mathbb{P}(C_{t} | D_{1} = d_{1}, \ldots, D_{t} = d_{t}) \propto \mathbb{P}(C_{t} | D_{1} = d_{1}, \ldots, D_{t-1} = d_{t-1})p(d_{t}|c_{t})
+\label{p2}
+\end{equation}
+and we know that $p(d_{t}|c_{t})$ is the probability density function of Gaussian distribution, we can use Formula \ref{p2} to update existing posterior probabilities in \texttt{self.belief}. The $p(d_{t}|c_{t})$ (pdf) can be get by \texttt{util.pdf}, with the mean being the real distance between two locations, variance being a const number, value being the \texttt{observedDist}, which is a Gaussian variant. Then we multiply it with the original probability and normalize the matrix in the end.
+
+\section{Problem 3}
+We take time into consideration by transition probabilities $p(c_{t+1}|c_{t})$.
+We know that
+\begin{equation}
+\mathbb{P}(C_{t+1} = c_{t+1} | D_{1} = d_{1}, \ldots, D_{t} = d_{t}) \propto \sum_{c_{t}}\mathbb{P}(C_{t} = c_{t} | D_{1} = d_{1}, \ldots, D_{t} = d_{t})p(c_{t+1}|c_{t})
+\end{equation}
+and $p(c_{t+1}|c_{t})$ is given by \texttt{self.transProb}. So for every $C_{t}$ that can transfer to $C_{t+1}$, we need to calculate $\mathbb{P}(C_{t} = c_{t} | D_{1} = d_{1}, \ldots, D_{t} = d_{t})p(c_{t+1}|c_{t})$ and add them up, and then normalize. I use a dictionary \texttt{trans\_next\_now} to record all the connecting $C_{t}$, then traverse to add the stats up, and finally normalize.
+
+\section{Problem 4}
+In this problem, we use particles to simulate instead of accurate inference.
+
+\subsection{Problem 4a}
+The \texttt{observe} function is different from last one. There are two processes: \textit{reweight} and \textit{resample}. In the reweight procedure, we use the same Formula \ref{p2} to update posterior probability (unnormalized) as weight. In the resample procedure, we use \texttt{util.weightedRandomChoice} function to sample new particles based on their weights.
+
+\subsection{Problem 4b}
+As we know, the particles in the same tile share same transfer probabilities, so we need to deal with particles by tiles. For particles in the same tile (location), we resample new particles based on the same transfer probabilities for this tile as their weights
+
+
+
+
+
+
+
+
+
 
 
 

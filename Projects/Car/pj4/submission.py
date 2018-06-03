@@ -45,7 +45,15 @@ class ExactInference(object):
 
     def observe(self, agentX, agentY, observedDist):
         # BEGIN_YOUR_CODE (our solution is 6 lines of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        for row in range(self.belief.numRows):
+            for col in range(self.belief.numCols):
+                prob = self.belief.getProb(row, col)    # old probability
+                x, y = util.colToX(col), util.rowToY(row)  # location
+                distance = math.sqrt( (agentX-x)**2 + (agentY-y)**2 )
+                emission_pdf = util.pdf(distance, Const.SONAR_STD, observedDist)   # pdf, NOT probability!!!
+                self.belief.setProb(row, col, prob * emission_pdf)  # proportional to this number
+        self.belief.normalize() # normalize to 1
         # END_YOUR_CODE
 
     ############################################################
@@ -68,7 +76,23 @@ class ExactInference(object):
     def elapseTime(self):
         if self.skipElapse: return ### ONLY FOR THE GRADER TO USE IN Problem 2
         # BEGIN_YOUR_CODE (our solution is 6 lines of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        trans_next_now = collections.defaultdict(list)  # the old tiles that can transfer to new tile
+        for key in self.transProb:
+            oldTile, newTile = key
+            trans_next_now[newTile].append(oldTile) # record the adjacent old tiles
+        old_probs = {}
+        for row in range(self.belief.numRows):
+            for col in range(self.belief.numCols):
+                old_probs[ (row, col) ] = self.belief.getProb(row, col) # record the old probabilities
+        for row in range(self.belief.numRows):
+            for col in range(self.belief.numCols):
+                newTile = (row, col)    # try to update
+                oldTile_lis = trans_next_now[newTile]   # the old tiles that adjacent to newTile
+                # update according to the proportional formula
+                tmp_lis = [ old_probs[oldTile] * self.transProb[(oldTile, newTile)] for oldTile in oldTile_lis ]
+                self.belief.setProb(row, col, sum(tmp_lis)) # update
+        self.belief.normalize()
         # END_YOUR_CODE
       
     # Function: Get Belief
@@ -78,7 +102,7 @@ class ExactInference(object):
     def getBelief(self):
         return self.belief
 
-        
+       
 # Class: Particle Filter
 # ----------------------
 # Maintain and update a belief distribution over the probability of a car
@@ -155,7 +179,19 @@ class ParticleFilter(object):
     ############################################################
     def observe(self, agentX, agentY, observedDist):
         # BEGIN_YOUR_CODE (our solution is 12 lines of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        weightDict = {}
+        for particle in self.particles: # particle is actually a tile
+            prob = self.particles[particle] # actually the number of particles, not normalized
+            row, col = particle
+            x, y = util.colToX(col), util.rowToY(row)  # location
+            distance = math.sqrt( (agentX-x)**2 + (agentY-y)**2 )
+            emission_pdf = util.pdf(distance, Const.SONAR_STD, observedDist)   # pdf, NOT probability
+            weightDict[particle] = prob * emission_pdf  # reweight
+        self.particles = collections.defaultdict(int)
+        for i in range(self.NUM_PARTICLES):
+            particle = util.weightedRandomChoice(weightDict)    # resample
+            self.particles[particle] += 1
         # END_YOUR_CODE
         self.updateBelief()
     
@@ -181,7 +217,16 @@ class ParticleFilter(object):
     ############################################################
     def elapseTime(self):
         # BEGIN_YOUR_CODE (our solution is 6 lines of code, but don't worry if you deviate from this)
-        raise Exception("Not implemented yet")
+        #raise Exception("Not implemented yet")
+        new_particle_dict = collections.defaultdict(int)
+        for particle in self.particles: # particle is actually a tile
+            num = self.particles[particle]  # the number of particles in current tile
+            for _ in range(num):
+                # resample based on transfer probability for current tile
+                new_particle = util.weightedRandomChoice(self.transProbDict[particle])
+                new_particle_dict[new_particle] += 1
+        self.particles = new_particle_dict
+        self.updateBelief()
         # END_YOUR_CODE
         
     # Function: Get Belief
